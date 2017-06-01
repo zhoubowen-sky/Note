@@ -5,16 +5,20 @@
 
 package com.lingdongkuaichuan.note.activity;
 
+import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.lingdongkuaichuan.note.R;
+import com.lingdongkuaichuan.note.db.DbHelper;
+import com.lingdongkuaichuan.note.db.NoteDB;
 import com.lingdongkuaichuan.note.fragment.FolderFragment;
 import com.lingdongkuaichuan.note.fragment.HomeFragment;
 import com.lingdongkuaichuan.note.fragment.UserFragment;
@@ -23,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
+
+    private final String TAG = this.getClass().getSimpleName();
 
     // 对首页三个Fragment进行编号
     private static final int FRAGMENT_HOME   = 0;
@@ -33,8 +39,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private FragmentPagerAdapter mFragmentPagerAdapter; // 适配器
     private List<Fragment> mFragments;                  // 存储三个Fragment的List
 
-    private ImageButton img_btn_search;    // 左上角搜索按钮
-    private ImageButton img_btn_add_notes; //右上角添加计事按钮
+//    private ImageButton img_btn_search;    // 左上角搜索按钮
+//    private ImageButton img_btn_add_notes; //右上角添加计事按钮
 
     // Tab 上三个图片按钮
     private ImageButton img_btn_home;
@@ -46,6 +52,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private LinearLayout mFolder;
     private LinearLayout mUser;
 
+    public static Context mContext;
 
 
     @Override
@@ -53,13 +60,21 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         //requestWindowFeature(Window.FEATURE_NO_TITLE); // 不显示title
         setContentView(R.layout.activity_main);
-        
+
+        setContext();
+
+        NoteDB.createDatebase(mContext);
+
         initView();
 
         initEvent();
 
         setPagerSelect(FRAGMENT_HOME);
-        
+
+    }
+
+    private void setContext() {
+        mContext = getApplicationContext();
     }
 
     /**
@@ -135,6 +150,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      * 初始化事件
      */
     private void initEvent() {
+        // 给Tab的三个布局添加点击事件监听
         mHome.setOnClickListener(this);
         mFolder.setOnClickListener(this);
         mUser.setOnClickListener(this);
@@ -157,7 +173,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case FRAGMENT_USER:
                 img_btn_user.setBackgroundResource(R.drawable.ic_user_selected);
                 break;
-
         }
     }
 

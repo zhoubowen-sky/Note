@@ -2,20 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="45dp"
+    android:layout_gravity="bottom"
+    android:gravity="center"
     android:orientation="horizontal">
 
     <LinearLayout
         android:id="@+id/id_tab_home"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
+        android:clickable="true"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical">
     <ImageButton
         android:id="@+id/img_btn_home"
         android:background="@drawable/ic_home"
-        android:layout_width="45dp"
-        android:layout_height="45dp" />
+        android:clickable="false"
+        android:layout_width="40dp"
+        android:layout_height="40dp" />
 
     </LinearLayout>
 
@@ -23,14 +27,16 @@
         android:id="@+id/id_tab_folder"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
+        android:clickable="true"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical">
         <ImageButton
             android:id="@+id/img_btn_folder"
+            android:clickable="false"
             android:background="@drawable/ic_folder"
-            android:layout_width="45dp"
-            android:layout_height="45dp"  />
+            android:layout_width="40dp"
+            android:layout_height="40dp"  />
 
     </LinearLayout>
 
@@ -38,14 +44,16 @@
         android:id="@+id/id_tab_user"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
+        android:clickable="true"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical">
         <ImageButton
             android:id="@+id/img_btn_user"
             android:background="@drawable/ic_user"
-            android:layout_width="45dp"
-            android:layout_height="45dp" />
+            android:clickable="false"
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
 
     </LinearLayout>
 
