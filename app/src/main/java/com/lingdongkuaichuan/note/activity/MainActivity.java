@@ -39,9 +39,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private FragmentPagerAdapter mFragmentPagerAdapter; // 适配器
     private List<Fragment> mFragments;                  // 存储三个Fragment的List
 
-//    private ImageButton img_btn_search;    // 左上角搜索按钮
-//    private ImageButton img_btn_add_notes; //右上角添加计事按钮
-
     // Tab 上三个图片按钮
     private ImageButton img_btn_home;
     private ImageButton img_btn_folder;

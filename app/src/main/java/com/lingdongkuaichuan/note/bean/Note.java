@@ -8,14 +8,14 @@ public class Note {
 
     private String tittle;
     private String content;
-    private long date;
-    private int id;
+    private String date;
+    //private int id;
 
-    public Note(String tittle , String content , long date , int id){
+    public Note(/*int id , */String tittle , String content , String date){
         this.tittle = tittle;
         this.content = content;
         this.date = date;
-        this.id = id;
+        //this.id = id;
     }
 
     public String getTittle() {
@@ -34,19 +34,19 @@ public class Note {
         this.content = content;
     }
 
-    public long getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(long date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
-    public int getId() {
+/*    public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
+    }*/
 }
