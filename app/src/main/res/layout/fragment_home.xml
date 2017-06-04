@@ -5,8 +5,6 @@
     android:orientation="vertical"
     tools:context="com.lingdongkuaichuan.note.fragment.HomeFragment">
 
-    <include layout="@layout/head_layout"></include>
-
     <ListView
         android:id="@+id/lv_note"
         android:layout_width="match_parent"

@@ -1,22 +1,35 @@
 package com.lingdongkuaichuan.note.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by 周博文 on 2017/6/1.
  */
 
-public class Note {
+public class Note implements Serializable {
 
     private String tittle;
     private String content;
     private String date;
-    //private int id;
+    private int id;
+    private int folder_id;
 
-    public Note(/*int id , */String tittle , String content , String date){
+    public Note(int id , String tittle , String content , String date , int folder_id){
         this.tittle = tittle;
         this.content = content;
         this.date = date;
-        //this.id = id;
+        this.id = id;
+        this.folder_id = folder_id;
     }
+
+    public int getFolder_id() {
+        return folder_id;
+    }
+
+    public void setFolder_id(int folder_id) {
+        this.folder_id = folder_id;
+    }
+
 
     public String getTittle() {
         return tittle;
@@ -42,11 +55,11 @@ public class Note {
         this.date = date;
     }
 
-/*    public int getId() {
+    public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }*/
+    }
 }

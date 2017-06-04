@@ -9,11 +9,13 @@
         android:id="@+id/img_btn_search_notes"
         android:layout_width="45dp"
         android:layout_height="45dp"
+        android:background="@drawable/ic_home"
         android:layout_gravity="center"
         android:gravity="center"
         android:layout_marginLeft="10dp"/>
 
     <TextView
+        android:id="@+id/tv_head_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/str_home"
@@ -25,7 +27,18 @@
         android:id="@+id/img_btn_add_notes"
         android:layout_width="45dp"
         android:layout_height="45dp"
+        android:background="@drawable/ic_folder"
         android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginRight="10dp"/>
+
+    <ImageButton
+        android:id="@+id/img_btn_add_folders"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@color/colorPrimaryDark"
+        android:layout_gravity="center"
+        android:visibility="gone"
         android:gravity="center"
         android:layout_marginRight="10dp"/>
 

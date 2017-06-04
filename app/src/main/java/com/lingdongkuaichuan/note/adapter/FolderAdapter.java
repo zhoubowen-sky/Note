@@ -8,34 +8,33 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.lingdongkuaichuan.note.R;
-import com.lingdongkuaichuan.note.bean.Note;
+import com.lingdongkuaichuan.note.bean.Folder;
 import com.lingdongkuaichuan.note.utils.DateUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by 周博文 on 2017/6/1.
+ * Created by 周博文 on 2017/6/4.
  */
 
-public class NoteAdapter extends BaseAdapter {
+public class FolderAdapter extends BaseAdapter {
 
-    private List<Note> data;
-
-    private LayoutInflater layoutInflater;
+    private List<Folder> data = new ArrayList<Folder>();
 
     private Context context;
 
-    public NoteAdapter(Context context, List<Note> data){
-        this.context = context;
+    private LayoutInflater layoutInflater;
+
+    public FolderAdapter(List<Folder> data, Context context){
         this.data = data;
+        this.context = context;
         this.layoutInflater = LayoutInflater.from(context);
     }
 
     private class ViewHolder{
-        public TextView tv_note_item_title;
-        public TextView tv_note_item_content;
-        public TextView tv_note_item_date;
-
+        public TextView tv_folder_item_name;
+        public TextView tv_folder_item_date;
     }
 
 
@@ -60,21 +59,20 @@ public class NoteAdapter extends BaseAdapter {
         ViewHolder viewHolder = null;
         if (viewHolder == null){
             viewHolder = new ViewHolder();
-            // 实例化 item 中的组件
-            convertView = layoutInflater.inflate(R.layout.note_item_layout,null);
-            viewHolder.tv_note_item_title = (TextView) convertView.findViewById(R.id.tv_note_item_title);
-            viewHolder.tv_note_item_content = (TextView) convertView.findViewById(R.id.tv_note_item_content);
-            viewHolder.tv_note_item_date = (TextView) convertView.findViewById(R.id.tv_note_item_date);
+
+            convertView = layoutInflater.inflate(R.layout.folder_item_layout, null);
+            viewHolder.tv_folder_item_name = (TextView) convertView.findViewById(R.id.tv_folder_item_name);
+            viewHolder.tv_folder_item_date = (TextView) convertView.findViewById(R.id.tv_folder_item_date);
             convertView.setTag(viewHolder);
         }else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        // 将 data 数据绑定
-        viewHolder.tv_note_item_title.setText(data.get(position).getTittle());
-        viewHolder.tv_note_item_content.setText(data.get(position).getContent());
+        // 绑定数据
+        viewHolder.tv_folder_item_name.setText(data.get(position).getName());
         // 此处将时间戳转换为标准时间格式
         String date_str = DateUtil.dateLineToString(data.get(position).getDate());
-        viewHolder.tv_note_item_date.setText(date_str);
+        viewHolder.tv_folder_item_date.setText(date_str);
+
 
         return convertView;
     }

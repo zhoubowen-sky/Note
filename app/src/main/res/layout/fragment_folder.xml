@@ -2,11 +2,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.lingdongkuaichuan.note.fragment.HomeFragment">
 
-    <TextView
+    <ListView
+        android:id="@+id/lv_folder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Folder" />
+        android:layout_height="wrap_content">
+
+    </ListView>
 
 </LinearLayout>

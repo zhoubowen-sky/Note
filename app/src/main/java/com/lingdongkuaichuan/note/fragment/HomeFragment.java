@@ -1,15 +1,20 @@
 package com.lingdongkuaichuan.note.fragment;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.lingdongkuaichuan.note.R;
+import com.lingdongkuaichuan.note.activity.EditNoteActivity;
+import com.lingdongkuaichuan.note.activity.MainActivity;
 import com.lingdongkuaichuan.note.adapter.NoteAdapter;
 import com.lingdongkuaichuan.note.bean.Note;
 import com.lingdongkuaichuan.note.db.NoteDB;
@@ -23,14 +28,14 @@ import java.util.List;
 
 public class HomeFragment extends Fragment {
 
-    private ImageButton img_btn_search_notes;    // 左上角搜索按钮
-    private ImageButton img_btn_add_notes; //右上角添加计事按钮
+    private final String TAG = this.getClass().getSimpleName();
+
 
     private ListView listView;
 
     private NoteAdapter noteAdapter;
 
-    private List<Note> noteList = new ArrayList<Note>();
+    public static List<Note> noteList = new ArrayList<Note>();
 
 
     @Override
@@ -43,21 +48,12 @@ public class HomeFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        img_btn_search_notes = (ImageButton) view.findViewById(R.id.img_btn_search_notes);
-        img_btn_add_notes    = (ImageButton) view.findViewById(R.id.img_btn_add_notes);
-
         listView = (ListView) view.findViewById(R.id.lv_note);
         // 绘制 listview 画面
         refreshListView();
 
-        img_btn_add_notes.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getActivity().getApplicationContext(),"你点击了添加便签按钮！",Toast.LENGTH_LONG).show();
-                NoteDB.insertTestData();
-            }
-        });
-
+        // item 设置监听器
+        setItemClickListener();
 
         return view;
     }
@@ -69,49 +65,32 @@ public class HomeFragment extends Fragment {
         listView.setAdapter(noteAdapter);
     }
 
+    /**
+     * listview 设定点击以及长按的监听事件
+     */
+    private void setItemClickListener(){
+        // 点击事件
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG, "点击了listview，点击的position为：" + position);
+                // 跳转到便签的编辑界面
+                Intent editNoteIntent = new Intent();
+                editNoteIntent.setClass(getActivity(), EditNoteActivity.class);
+                editNoteIntent.putExtra(MainActivity.ADD_OR_EDIT_NOTE, MainActivity.INTENT_EDIT_NOTE);
+                editNoteIntent.putExtra(MainActivity.NOTE_ID, noteList.get(position)); // listview 的 position 获取对象，传递整个对象过去
+                getActivity().startActivityForResult(editNoteIntent, 2);
+            }
+        });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        // 长按事件
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                return false;
+            }
+        });
+    }
 
 
 

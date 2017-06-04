@@ -5,6 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!--主界面顶部布局-->
+    <include layout="@layout/head_layout"></include>
+
     <!--滑动项布局-->
     <android.support.v4.view.ViewPager
         android:id="@+id/id_viewpager"
