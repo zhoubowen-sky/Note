@@ -25,4 +25,9 @@ public class DateUtil {
         return date_str;
     }
 
+    public static String getCurrentDateLine(){
+        return System.currentTimeMillis() + "";
+    }
+
+
 }

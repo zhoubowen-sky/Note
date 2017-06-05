@@ -41,7 +41,6 @@ public class NoteDB {
         NoteDB noteDB = new NoteDB(context);
     }
 
-
     public static long insertOneNote(Note note){
         ContentValues cv = new ContentValues();
         cv.put(DbHelper.TABLE_NOTE_COLUMN_TITTLE, note.getTittle());
@@ -89,7 +88,7 @@ public class NoteDB {
 
     public static List<Folder> getAllFolders(){
         List<Folder> folderList = new ArrayList<Folder>();
-        String sql = "select * from " + DbHelper.TABLE_FOLDER_NAME;
+        String sql = "select * from " + DbHelper.TABLE_FOLDER_NAME + " order by " + DbHelper.TABLE_FOLDER_COLUMN_DATE + " desc ";
         Cursor cursor = db.rawQuery(sql,null);
         while (cursor.moveToNext()){
             int id      = cursor.getInt(cursor.getColumnIndex(DbHelper.TABLE_FOLDER_COLUMN_ID));

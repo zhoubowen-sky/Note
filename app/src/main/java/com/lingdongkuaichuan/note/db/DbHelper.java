@@ -22,7 +22,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "note_db";
     public static final String TABLE_NOTE_NAME = "note";
     public static final String TABLE_FOLDER_NAME = "folder";
-    public static final String DEFAULT_FOLDER_NAME = "默认文件夹";
+    public static final String DEFAULT_FOLDER_NAME = "默认分组";
 
     public static final String TABLE_NOTE_COLUMN_TITTLE = "note_title";
     public static final String TABLE_NOTE_COLUMN_CONTENT = "note_content";

@@ -14,6 +14,16 @@
         android:gravity="center"
         android:layout_marginLeft="10dp"/>
 
+    <ImageButton
+        android:id="@+id/img_btn_back"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="#929511"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginLeft="10dp"/>
+
     <TextView
         android:id="@+id/tv_head_title"
         android:layout_width="wrap_content"

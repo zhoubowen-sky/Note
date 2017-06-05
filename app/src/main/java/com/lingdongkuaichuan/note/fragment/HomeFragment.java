@@ -1,5 +1,7 @@
 package com.lingdongkuaichuan.note.fragment;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -8,9 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.lingdongkuaichuan.note.R;
 import com.lingdongkuaichuan.note.activity.EditNoteActivity;
@@ -37,6 +38,9 @@ public class HomeFragment extends Fragment {
 
     public static List<Note> noteList = new ArrayList<Note>();
 
+    private HomeToMainActivity setEditTab;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,8 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         listView = (ListView) view.findViewById(R.id.lv_note);
+
+
         // 绘制 listview 画面
         refreshListView();
 
@@ -57,6 +63,7 @@ public class HomeFragment extends Fragment {
 
         return view;
     }
+
 
     private void refreshListView(){
         noteList.clear();
@@ -87,10 +94,40 @@ public class HomeFragment extends Fragment {
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                return false;
+                // 隐藏底部原来的的tab 展示新的Tab 这里用到接口回调与Activity通信
+                setEditTab.setEditTab("HomeFragment....");
+
+
+                // 如果返回true那么click就不会再被调用了
+                return true;
             }
         });
     }
+
+
+    @Override
+    public void onAttach(Context context){
+        super.onAttach(context);
+        // 调用与MainActivity通信的接口方法 setEditTab()实现更改Tab
+        setEditTab = (HomeToMainActivity) context;
+
+    }
+
+    public interface HomeToMainActivity {
+        /**
+         * 更改 MainActivity 里面的tab布局
+         * @param string
+         */
+        public void setEditTab(String string);
+
+        /**
+         * 恢复 MainActivity 里面的tab布局
+         * @param string
+         */
+        public void reSetEditTab(String string);
+    }
+
+
 
 
 

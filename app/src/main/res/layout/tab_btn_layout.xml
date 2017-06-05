@@ -4,58 +4,130 @@
     android:layout_height="45dp"
     android:layout_gravity="bottom"
     android:gravity="center"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/id_tab_home"
-        android:layout_width="0dp"
-        android:layout_height="fill_parent"
-        android:clickable="true"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
-    <ImageButton
-        android:id="@+id/img_btn_home"
-        android:background="@drawable/ic_home"
-        android:clickable="false"
-        android:layout_width="40dp"
-        android:layout_height="40dp" />
+        android:id="@+id/ll_note_tab"
+        android:layout_width="match_parent"
+        android:layout_height="45dp">
 
+        <LinearLayout
+            android:id="@+id/id_tab_home"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/img_btn_home"
+                android:background="@drawable/ic_home"
+                android:clickable="false"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/id_tab_folder"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/img_btn_folder"
+                android:clickable="false"
+                android:background="@drawable/ic_folder"
+                android:layout_width="40dp"
+                android:layout_height="40dp"  />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/id_tab_user"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/img_btn_user"
+                android:background="@drawable/ic_user"
+                android:clickable="false"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+        </LinearLayout>
     </LinearLayout>
+
+
+
+
+
+
+
 
     <LinearLayout
-        android:id="@+id/id_tab_folder"
-        android:layout_width="0dp"
-        android:layout_height="fill_parent"
-        android:clickable="true"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
-        <ImageButton
-            android:id="@+id/img_btn_folder"
-            android:clickable="false"
-            android:background="@drawable/ic_folder"
-            android:layout_width="40dp"
-            android:layout_height="40dp"  />
+        android:id="@+id/ll_note_tab_edit"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="45dp">
 
+        <LinearLayout
+            android:id="@+id/id_tab_mark"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/img_btn_mark"
+                android:background="@color/colorPrimaryDark"
+                android:clickable="false"
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/id_tab_delete"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/img_btn_delete"
+                android:clickable="false"
+                android:background="@color/colorPrimary"
+                android:layout_width="40dp"
+                android:layout_height="40dp"  />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/id_tab_move_to_folder"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:clickable="true"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageButton
+                android:id="@+id/img_btn_move_to_folder"
+                android:background="@color/colorAccent"
+                android:clickable="false"
+                android:layout_width="30dp"
+                android:layout_height="30dp" />
+
+        </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/id_tab_user"
-        android:layout_width="0dp"
-        android:layout_height="fill_parent"
-        android:clickable="true"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
-        <ImageButton
-            android:id="@+id/img_btn_user"
-            android:background="@drawable/ic_user"
-            android:clickable="false"
-            android:layout_width="30dp"
-            android:layout_height="30dp" />
-
-    </LinearLayout>
 
 
 </LinearLayout>

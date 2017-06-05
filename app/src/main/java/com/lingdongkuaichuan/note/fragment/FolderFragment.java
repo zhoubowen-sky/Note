@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.lingdongkuaichuan.note.R;
@@ -41,7 +42,31 @@ public class FolderFragment extends Fragment {
 
         refreshListView();
 
+        setItemClickListener();
+
         return view;
+    }
+
+    // 点击 长按事件监听器
+    private void setItemClickListener() {
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // 点击哪个分组，就只展示该分组下面的便签 该分组下没有则展示无
+
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                // 长按分组 重命名分组或者删除分组
+
+                return false;
+            }
+        });
+
     }
 
     private void refreshListView() {

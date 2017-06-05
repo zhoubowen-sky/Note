@@ -6,6 +6,7 @@
 package com.lingdongkuaichuan.note.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
@@ -13,8 +14,12 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,8 +27,6 @@ import android.widget.Toast;
 
 import com.lingdongkuaichuan.note.R;
 import com.lingdongkuaichuan.note.bean.Folder;
-import com.lingdongkuaichuan.note.bean.Note;
-import com.lingdongkuaichuan.note.db.DbHelper;
 import com.lingdongkuaichuan.note.db.NoteDB;
 import com.lingdongkuaichuan.note.fragment.FolderFragment;
 import com.lingdongkuaichuan.note.fragment.HomeFragment;
@@ -35,9 +38,12 @@ import java.util.List;
 
 import static com.lingdongkuaichuan.note.db.DbHelper.DEFAULT_FOLDER_NAME;
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener {
+public class MainActivity extends FragmentActivity implements View.OnClickListener, HomeFragment.HomeToMainActivity {
 
     private final String TAG = this.getClass().getSimpleName();
+
+    // 用于keydowm back按键的响应判断
+    private static boolean isResetEditTab = false;
 
     // 对首页三个Fragment进行编号
     private static final int FRAGMENT_HOME   = 0;
@@ -59,11 +65,24 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private ImageButton img_btn_home;
     private ImageButton img_btn_folder;
     private ImageButton img_btn_user;
+    // edit tab 上三个按钮
+    private ImageButton img_btn_mark;
+    private ImageButton img_btn_delete;
+    private ImageButton img_btn_move_to_folder;
 
     // 三个Tab所在的三个布局
     private LinearLayout mHome;
     private LinearLayout mFolder;
     private LinearLayout mUser;
+
+    // 包含两个tab的两个linearlayout
+    private LinearLayout ll_note_tab;
+    private LinearLayout ll_note_tab_edit;
+
+    private LinearLayout id_tab_mark;
+    private LinearLayout id_tab_delete;
+    private LinearLayout id_tab_move_to_folder;
+
 
     public static Context mContext;
 
@@ -72,6 +91,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private ImageButton img_btn_add_notes;       // 右上角添加表便签按钮
     private ImageButton img_btn_add_folders;     // 右上角添加文件夹按钮
     private TextView tv_head_title;              // 中间标题
+    private ImageButton img_btn_back;            // 左上角返回 平时处于 gone 状态
 
     // SharedPreferences 相关常量
     private static final String firstStart_spf = "firstStart_spf";
@@ -115,16 +135,17 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         edtior.commit();
         // 首次启动，执行写入默认数据的操作
         // 默认给folder创建一条数据，默认文件夹
-        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, DEFAULT_FOLDER_NAME, System.currentTimeMillis() + ""));
-        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, "文件夹一", System.currentTimeMillis() + ""));
-        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, "文件夹二", System.currentTimeMillis() + ""));
+        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, DEFAULT_FOLDER_NAME, DateUtil.getCurrentDateLine()));
+        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, "分组一", DateUtil.getCurrentDateLine()));
+        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, "分组二", DateUtil.getCurrentDateLine()));
 
         Log.d(TAG, "APP 首次启动");
         return true;
     }
 
     private void setContext() {
-        mContext = getApplicationContext();
+//        mContext = getApplicationContext();
+        mContext = MainActivity.this;
     }
 
     /**
@@ -146,16 +167,30 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mHome   = (LinearLayout) findViewById(R.id.id_tab_home);
         mFolder = (LinearLayout) findViewById(R.id.id_tab_folder);
         mUser   = (LinearLayout) findViewById(R.id.id_tab_user);
+        id_tab_mark = (LinearLayout) findViewById(R.id.id_tab_mark);
+        id_tab_delete = (LinearLayout) findViewById(R.id.id_tab_delete);
+        id_tab_move_to_folder = (LinearLayout) findViewById(R.id.id_tab_move_to_folder);
 
-        img_btn_home   = (ImageButton) findViewById(R.id.img_btn_home);
-        img_btn_folder = (ImageButton) findViewById(R.id.img_btn_folder);
-        img_btn_user   = (ImageButton) findViewById(R.id.img_btn_user);
+        // 两个tab的布局
+        ll_note_tab      = (LinearLayout) findViewById(R.id.ll_note_tab);
+        ll_note_tab_edit = (LinearLayout) findViewById(R.id.ll_note_tab_edit);
+//        ll_note_tab.setVisibility(View.GONE);
+//        ll_note_tab_edit.setVisibility(View.VISIBLE);
+
+
+        img_btn_home           = (ImageButton) findViewById(R.id.img_btn_home);
+        img_btn_folder         = (ImageButton) findViewById(R.id.img_btn_folder);
+        img_btn_user           = (ImageButton) findViewById(R.id.img_btn_user);
+        img_btn_mark           = (ImageButton) findViewById(R.id.img_btn_mark);
+        img_btn_delete         = (ImageButton) findViewById(R.id.img_btn_delete);
+        img_btn_move_to_folder = (ImageButton) findViewById(R.id.img_btn_move_to_folder);
 
         // head布局的搜索和添加按钮
         img_btn_search_notes = (ImageButton) findViewById(R.id.img_btn_search_notes);
         img_btn_add_notes    = (ImageButton) findViewById(R.id.img_btn_add_notes);
         img_btn_add_folders  = (ImageButton) findViewById(R.id.img_btn_add_folders);
         tv_head_title        = (TextView) findViewById(R.id.tv_head_title);
+        img_btn_back         = (ImageButton) findViewById(R.id.img_btn_back);
 
         // 分别实例化这三个Fragment 并放入List
         mFragments = new ArrayList<Fragment>();
@@ -244,6 +279,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             // 隐藏掉右上角添加note按钮 显示添加文件夹按钮
             img_btn_add_notes.setVisibility(View.GONE);
             img_btn_add_folders.setVisibility(visible);
+            img_btn_search_notes.setVisibility(visible);
         }
     }
 
@@ -256,10 +292,17 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mHome.setOnClickListener(this);
         mFolder.setOnClickListener(this);
         mUser.setOnClickListener(this);
+        // 给edit Tab的三个布局添加点击事件监听
+        id_tab_mark.setOnClickListener(this);
+        id_tab_delete.setOnClickListener(this);
+        id_tab_move_to_folder.setOnClickListener(this);
         // 给head的按钮添加监听事件
         img_btn_add_notes.setOnClickListener(this);
         img_btn_search_notes.setOnClickListener(this);
         img_btn_add_folders.setOnClickListener(this);
+        img_btn_back.setOnClickListener(this);
+
+
     }
 
     /**
@@ -305,6 +348,18 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case R.id.id_tab_user:
                 setPagerSelect(FRAGMENT_USER);
                 break;
+            case R.id.id_tab_mark:
+                Toast.makeText(getApplicationContext(), "id_tab_mark", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.id_tab_delete:
+                Toast.makeText(getApplicationContext(), "id_tab_delete", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.id_tab_move_to_folder:
+                Toast.makeText(getApplicationContext(), "id_tab_move_to_folder", Toast.LENGTH_SHORT).show();
+                break;
+
+
+
             // 按照关键字查找便签
             case R.id.img_btn_search_notes:
 
@@ -319,12 +374,48 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
                 break;
             case R.id.img_btn_add_folders:
-                Toast.makeText(getApplicationContext(), "点击了 添加文件夹按钮", Toast.LENGTH_SHORT).show();
-                //
+                // 弹出编辑框，输入文件夹的名称
+                showAddFolderDialog();
+                break;
+            case R.id.img_btn_back:
+                // 当展示出了新的tab后，此按钮才显示出来，点击它要取消 setEditTab()做出的操作
+                reSetEditTab("点击了左上角 back 按钮传入的参数");
                 break;
 
 
         }
+    }
+
+    /**
+     * 展示添加文件夹的 带编辑框的dailog
+     */
+    private void showAddFolderDialog() {
+        final EditText ed_folder_name = new EditText(mContext);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle("新建分组")
+                .setView(ed_folder_name)
+                .setNegativeButton("取消", null);
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (!(ed_folder_name.getText().toString() == null || ed_folder_name.getText().toString().equals(""))){
+                    // 执行向数据表 folder 写入一条数据增加一个分组操作
+                    long rows = NoteDB.insertOneFolder(new Folder(0, ed_folder_name.getText().toString(), DateUtil.getCurrentDateLine()));
+                    if (rows <= 0){
+                        Log.e(TAG, "分组添加失败");
+                        Toast.makeText(getApplicationContext(), "分组添加失败", Toast.LENGTH_LONG).show();
+                    }else {
+                        Log.e(TAG, "分组添加成功");
+                        initView();
+                        setPagerSelect(FRAGMENT_FOLDER);
+                        Toast.makeText(getApplicationContext(), "分组添加成功", Toast.LENGTH_SHORT).show();
+                    }
+                }else {
+                    Toast.makeText(getApplicationContext(), "分组名称不能为空", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.show();
     }
 
     @Override
@@ -340,4 +431,80 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         }
     }
-}
+
+    /**
+     * 继承 HomeFragment 中自定义的接口 HomeToMainActivity 用于向MainActivity通信
+     * @param string
+     */
+    @Override
+    public void setEditTab(String string) {
+        isResetEditTab = true;
+        Log.d(TAG, "homefragment中定义的接口HomeToMainActivity 中 setEditTab 方法调用成功！传过来的参数为：" + string);
+        // 隐藏原有的Tab ll_note_tab 展示新的Tab ll_note_tab_edit
+        ll_note_tab.setVisibility(View.GONE);
+        ll_note_tab_edit.setVisibility(View.VISIBLE);
+        // 隐藏顶部添加note和查找按钮
+        img_btn_add_notes.setVisibility(View.GONE);
+        img_btn_search_notes.setVisibility(View.GONE);
+        // 展示左上角展示返回的图片按钮
+        img_btn_back.setVisibility(View.VISIBLE);
+        // viewpager 不可滑动
+        mViewPager.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // 设置为trunk不允许滑动
+                return true;
+            }
+        });
+        // 拦截keyback 事件，让其与 img_btn_back 一样
+
+    }
+
+    /**
+     * 继承 HomeFragment 中自定义的接口 HomeToMainActivity
+     * @param string
+     */
+    @Override
+    public void reSetEditTab(String string) {
+        // 隐藏Tab ll_note_tab_edit 展示Tab ll_note_tab
+        ll_note_tab.setVisibility(View.VISIBLE);
+        ll_note_tab_edit.setVisibility(View.GONE);
+        // 展示顶部添加note和查找按钮
+        img_btn_add_notes.setVisibility(View.VISIBLE);
+        img_btn_search_notes.setVisibility(View.VISIBLE);
+        // 隐藏左上角展示返回的图片按钮
+        img_btn_back.setVisibility(View.GONE);
+        // viewpager 可滑动
+        mViewPager.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // 设置为trunk不允许滑动
+                return false;
+            }
+        });
+        // 解除对 keyback拦截事件
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            Log.e(TAG, "按下了back键 onKeyDown()");
+            // 此处通过一个标志位判断当前是否是长按了listview
+            if (isResetEditTab){
+                reSetEditTab("按下了back键 onKeyDown() 按钮传入的参数");
+                isResetEditTab = false;
+                return true;
+            }else {
+                return super.onKeyDown(keyCode, event);
+            }
+
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+
+
+
+
+    }

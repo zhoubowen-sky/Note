@@ -40,7 +40,6 @@ public class EditNoteActivity extends AppCompatActivity {
 
         et_note_edit = (EditText) findViewById(R.id.et_note_edit);
 
-
         // 获取从MainActivity传过来的参数，如果是新建Note就直接新建，
         // 如果是编辑已有Note，则需要根据Note ID从数据库中取出其数据
         stringFromMainActivity = getStringFromMainActivity();
@@ -64,7 +63,7 @@ public class EditNoteActivity extends AppCompatActivity {
     }
 
     private String getNoteDate() {
-        return System.currentTimeMillis() + "";
+        return DateUtil.getCurrentDateLine();
     }
 
     private String getNoteContent() {
