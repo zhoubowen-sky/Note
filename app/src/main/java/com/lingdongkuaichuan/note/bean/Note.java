@@ -13,6 +13,16 @@ public class Note implements Serializable {
     private String date;
     private int id;
     private int folder_id;
+    private boolean checked;
+
+    public Note(int id , String tittle , String content , String date , int folder_id, boolean checked){
+        this.tittle = tittle;
+        this.content = content;
+        this.date = date;
+        this.id = id;
+        this.folder_id = folder_id;
+        this.checked = checked;
+    }
 
     public Note(int id , String tittle , String content , String date , int folder_id){
         this.tittle = tittle;
@@ -20,6 +30,15 @@ public class Note implements Serializable {
         this.date = date;
         this.id = id;
         this.folder_id = folder_id;
+        this.checked = false;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 
     public int getFolder_id() {

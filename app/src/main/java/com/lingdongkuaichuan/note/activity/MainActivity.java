@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.lingdongkuaichuan.note.R;
 import com.lingdongkuaichuan.note.bean.Folder;
+import com.lingdongkuaichuan.note.bean.Note;
 import com.lingdongkuaichuan.note.db.NoteDB;
 import com.lingdongkuaichuan.note.fragment.FolderFragment;
 import com.lingdongkuaichuan.note.fragment.HomeFragment;
@@ -38,7 +39,7 @@ import java.util.List;
 
 import static com.lingdongkuaichuan.note.db.DbHelper.DEFAULT_FOLDER_NAME;
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener, HomeFragment.HomeToMainActivity {
+public class MainActivity extends FragmentActivity implements View.OnClickListener, HomeFragment.HomeToMainActivity, FolderFragment.FolderToMainActivity {
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -97,6 +98,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private static final String firstStart_spf = "firstStart_spf";
     private static final String isFirstStart = "isFirstStart";
 
+    // 移动便签到文件夹的dialog
+    private AlertDialog chooseFolderDialog;
+    // 移动便签到文件夹的文件夹列表
+    List<Folder> chooseFolderList = new ArrayList<Folder>();
+    // 存储文件夹名称的列表
+    private String[] folder_items;
+    // 用户选中的文件夹
+    private static Folder choosedFolder = null;
 
 
     @Override
@@ -176,7 +185,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         ll_note_tab_edit = (LinearLayout) findViewById(R.id.ll_note_tab_edit);
 //        ll_note_tab.setVisibility(View.GONE);
 //        ll_note_tab_edit.setVisibility(View.VISIBLE);
-
 
         img_btn_home           = (ImageButton) findViewById(R.id.img_btn_home);
         img_btn_folder         = (ImageButton) findViewById(R.id.img_btn_folder);
@@ -302,7 +310,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         img_btn_add_folders.setOnClickListener(this);
         img_btn_back.setOnClickListener(this);
 
-
     }
 
     /**
@@ -348,24 +355,32 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case R.id.id_tab_user:
                 setPagerSelect(FRAGMENT_USER);
                 break;
+
             case R.id.id_tab_mark:
+                // 标记选中的便签，置顶
                 Toast.makeText(getApplicationContext(), "id_tab_mark", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.id_tab_delete:
-                Toast.makeText(getApplicationContext(), "id_tab_delete", Toast.LENGTH_SHORT).show();
+                // 删除选中的便签
+                deleteNotes(getSelectedNotes(HomeFragment.noteList));
+                Toast.makeText(getApplicationContext(), "已删除" + getSelectedNotes(HomeFragment.noteList).size() + "条便签", Toast.LENGTH_SHORT).show();
+                // 刷新界面
+                initView();
                 break;
             case R.id.id_tab_move_to_folder:
+                // 将选中的便签移动到指定的分组
                 Toast.makeText(getApplicationContext(), "id_tab_move_to_folder", Toast.LENGTH_SHORT).show();
+                // 获取listview中选中的便签 以及弹出框中选中的 folder
+                showSelectFolderDialog();
+
                 break;
 
-
-
-            // 按照关键字查找便签
             case R.id.img_btn_search_notes:
+                // 按照关键字查找便签
 
                 break;
-            // 添加便签
             case R.id.img_btn_add_notes:
+                // 添加便签
                 // 跳转到Note编辑界面 是一个新的Activity 跳转时传入参数用以区分是新建Note还是再次编辑已有Note
                 Intent editNoteIntent = new Intent();
                 editNoteIntent.putExtra(ADD_OR_EDIT_NOTE, INTENT_ADD_NOTE);
@@ -382,8 +397,91 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 reSetEditTab("点击了左上角 back 按钮传入的参数");
                 break;
 
-
         }
+    }
+
+    /**
+     * 展示选择分组的弹出框
+     */
+    private void showSelectFolderDialog() {
+        chooseFolderList = NoteDB.getAllFolders();
+        folder_items = new String[chooseFolderList.size()];
+        for (int i = 0 ; i < chooseFolderList.size(); i++){
+            folder_items[i] = chooseFolderList.get(i).getName();
+        }
+        AlertDialog.Builder alertBuiider = new AlertDialog.Builder(this);
+        alertBuiider.setTitle("请选择要移动到的分组");
+        alertBuiider.setSingleChoiceItems(folder_items, 0, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MainActivity.this, folder_items[which], Toast.LENGTH_SHORT).show();
+                // 根据ID得到选中的folder对象
+                choosedFolder = chooseFolderList.get(which);
+                Log.v(TAG, "选中的文件夹的ID：" + choosedFolder.getId());
+            }
+        });
+        alertBuiider.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                Toast.makeText(MainActivity.this, "点了确定....", Toast.LENGTH_SHORT).show();
+                // 操作数据库
+                moveNoteToFolder(getSelectedNotes(HomeFragment.noteList), choosedFolder);
+                // 关闭弹出框
+                chooseFolderDialog.dismiss();
+            }
+        });
+        alertBuiider.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MainActivity.this, "点了取消....", Toast.LENGTH_SHORT).show();
+                // 关闭弹出框
+                chooseFolderDialog.dismiss();
+            }
+        });
+        chooseFolderDialog = alertBuiider.create();
+        chooseFolderDialog.show();
+    }
+
+    /**
+     * 将便签移动到指定的分组
+     * @param noteList 便签数组
+     * @param folder 文件夹
+     */
+    private void moveNoteToFolder(List<Note> noteList, Folder folder) {
+        if(noteList.size() <= 0){
+            return;
+        }else {
+            Log.v(TAG, "moveNoteToFolder 选中便签个数：" + noteList.size());
+            NoteDB.moveNoteToFolder(noteList, folder);
+        }
+    }
+
+    /**
+     * 删除便签
+     * @param notes
+     */
+    public void deleteNotes(List<Note> notes){
+        if (notes.size() <= 0){
+            Toast.makeText(getApplication(), "未选中标签，未执行删除操作", Toast.LENGTH_SHORT).show();
+        }else {
+            NoteDB.deleteNotes(notes);
+        }
+    }
+
+    /**
+     * 获取listview已经选中的Notes
+     * @param notes
+     * @return
+     */
+    public List<Note> getSelectedNotes(List<Note> notes){
+        List<Note> selectedNotes = new ArrayList<Note>();
+        for (int i = 0; i < notes.size(); i++){
+            if (notes.get(i).isChecked()){
+                selectedNotes.add(notes.get(i));
+            }
+        }
+        return selectedNotes;
     }
 
     /**
@@ -423,12 +521,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case 1:
+                // INTENT_ADD_NOTE 添加新便签
                 initView();
                 break;
             case 2:
+                // INTENT_EDIT_NOTE 编辑已有的便签
                 initView();
                 break;
-
         }
     }
 
@@ -456,8 +555,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 return true;
             }
         });
-        // 拦截keyback 事件，让其与 img_btn_back 一样
-
     }
 
     /**
@@ -466,6 +563,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     @Override
     public void reSetEditTab(String string) {
+        // 隐藏CheckBox
+        HomeFragment.isShowCheckBox = false;
+        HomeFragment.noteAdapter.notifyDataSetChanged();
         // 隐藏Tab ll_note_tab_edit 展示Tab ll_note_tab
         ll_note_tab.setVisibility(View.VISIBLE);
         ll_note_tab_edit.setVisibility(View.GONE);
@@ -505,6 +605,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
 
-
-
+    @Override
+    public void reFreshView(String string) {
+        initView();
+        setPagerSelect(FRAGMENT_FOLDER);
     }
+}

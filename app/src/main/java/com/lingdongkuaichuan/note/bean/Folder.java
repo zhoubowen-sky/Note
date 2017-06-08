@@ -5,19 +5,33 @@ package com.lingdongkuaichuan.note.bean;
  */
 
 public class Folder {
+
     private int id;
     private String name;
     private String date;
+    private boolean checked;
 
     public Folder(int id , String name, String date){
         this.id = id;
         this.name = name;
         this.date = date;
+        this.checked = false;
     }
 
-    public Folder(String name, String date){
+    public Folder(int id , String name, String date, boolean checked){
+        this.id = id;
         this.name = name;
         this.date = date;
+        this.checked = checked;
+    }
+
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
     }
 
     public int getId() {

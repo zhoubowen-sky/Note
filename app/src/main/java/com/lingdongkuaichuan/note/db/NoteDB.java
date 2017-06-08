@@ -86,9 +86,13 @@ public class NoteDB {
         return noteList;
     }
 
+    /**
+     * 获取所有文件夹的信息
+     * @return folderList List<Folder>
+     */
     public static List<Folder> getAllFolders(){
         List<Folder> folderList = new ArrayList<Folder>();
-        String sql = "select * from " + DbHelper.TABLE_FOLDER_NAME + " order by " + DbHelper.TABLE_FOLDER_COLUMN_DATE + " desc ";
+        String sql = "select * from " + DbHelper.TABLE_FOLDER_NAME + " order by " + DbHelper.TABLE_FOLDER_COLUMN_ID;
         Cursor cursor = db.rawQuery(sql,null);
         while (cursor.moveToNext()){
             int id      = cursor.getInt(cursor.getColumnIndex(DbHelper.TABLE_FOLDER_COLUMN_ID));
@@ -98,6 +102,16 @@ public class NoteDB {
         }
         cursor.close();
         return folderList;
+    }
+
+    public static void moveNoteToFolder(List<Note> noteList, Folder folder){
+        for (int i = 0; i < noteList.size() ; i++){
+            Note newNote = noteList.get(i);
+            Log.v("NoteDB", "便签ID"+newNote.getId() +" 原先分组ID"+ newNote.getFolder_id() +" 传进了文件夹ID"+ folder.getId() + " 便签信息");
+//             将note 中 文件夹字段更改为 folder的ID
+            newNote.setFolder_id(folder.getId());
+            updateNote(newNote);
+        }
     }
 
     /**
@@ -120,12 +134,60 @@ public class NoteDB {
                 + " = \"" + note.getTittle() + "\""
                 + "," + DbHelper.TABLE_NOTE_COLUMN_CONTENT
                 + " = \"" + note.getContent() + "\""
+                + "," + DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID
+                + " = \"" + note.getFolder_id() + "\""
                 + "," + DbHelper.TABLE_NOTE_COLUMN_DATE
                 + " = " + note.getDate()
                 + " where " + DbHelper.TABLE_NOTE_COLUMN_ID + " = \"" + note.getId() + "\"";
         Log.d("NoteDB", "更新一条便签的SQL语句为：" + update_sql);
         db.execSQL(update_sql);
         return true;
+    }
+
+    public static boolean deleteNotes(List<Note> noteList){
+        for (int i = 0; i < noteList.size(); i++){
+            db.delete(DbHelper.TABLE_NOTE_NAME, DbHelper.TABLE_NOTE_COLUMN_ID + "=?", new String[]{Integer.toString(noteList.get(i).getId())} );
+            Log.d("NoteDB", "已删除id:" + noteList.get(i).getId() + " title:" + noteList.get(i).getTittle() + "的便签");
+        }
+        return true;
+    }
+
+    public static boolean reNameFolder(Folder folder){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DbHelper.TABLE_FOLDER_COLUMN_NAME, folder.getName());
+        contentValues.put(DbHelper.TABLE_FOLDER_COLUMN_DATE, folder.getDate());
+        contentValues.put(DbHelper.TABLE_FOLDER_COLUMN_ID, folder.getId());
+        String[] args = {Integer.toString(folder.getId())};
+        int rows = db.update(DbHelper.TABLE_FOLDER_NAME, contentValues, DbHelper.TABLE_FOLDER_COLUMN_ID+"=?", args);
+        Log.v("NoteDB", "重命名文件夹 rows = " + rows);
+        if (rows <= 0){
+            return false;
+        }else {
+            return true;
+        }
+    }
+
+    /**
+     * 删除一个文件夹以及该文件夹下面所有的便签
+     * @param folder
+     */
+    public static void deleteOneFolderAndNotes(Folder folder){
+        db.delete(DbHelper.TABLE_NOTE_NAME, DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID + "=?", new String[]{Integer.toString(folder.getId())});
+        deleteOneFolder(folder);
+        Log.d("NoteDB", "删除文件夹以及该文件夹下便签成功：" + folder.getName());
+    }
+
+    /**
+     * 删除一个文件夹
+     * @param folder
+     */
+    public static void deleteOneFolder(Folder folder){
+        long rows = db.delete(DbHelper.TABLE_FOLDER_NAME, DbHelper.TABLE_FOLDER_COLUMN_ID + "=?", new String[]{Integer.toString(folder.getId())});
+        if (rows <= 0){
+            Log.e("NoteDB", "删除文件夹失败：" + folder.getName());
+        }else {
+            Log.d("NoteDB", "删除文件夹成功：" + folder.getName());
+        }
     }
 
 

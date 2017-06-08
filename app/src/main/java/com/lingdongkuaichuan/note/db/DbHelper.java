@@ -19,7 +19,7 @@ public class DbHelper extends SQLiteOpenHelper {
     private static DbHelper dbHelper;
 
     private static final int DB_VERSION = 1;
-    private static final String DB_NAME = "note_db";
+    private static final String DB_NAME = "note.db";
     public static final String TABLE_NOTE_NAME = "note";
     public static final String TABLE_FOLDER_NAME = "folder";
     public static final String DEFAULT_FOLDER_NAME = "默认分组";

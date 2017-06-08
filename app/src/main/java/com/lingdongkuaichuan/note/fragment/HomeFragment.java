@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
@@ -34,12 +35,13 @@ public class HomeFragment extends Fragment {
 
     private ListView listView;
 
-    private NoteAdapter noteAdapter;
+    public static NoteAdapter noteAdapter;
 
     public static List<Note> noteList = new ArrayList<Note>();
 
     private HomeToMainActivity setEditTab;
 
+    public static boolean isShowCheckBox = false;
 
 
     @Override
@@ -96,8 +98,9 @@ public class HomeFragment extends Fragment {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 // 隐藏底部原来的的tab 展示新的Tab 这里用到接口回调与Activity通信
                 setEditTab.setEditTab("HomeFragment....");
-
-
+                // 展示listview所有的CheckBox 其默认为未选中隐藏，当长按以后显示
+                isShowCheckBox = true;
+                noteAdapter.notifyDataSetChanged();
                 // 如果返回true那么click就不会再被调用了
                 return true;
             }
