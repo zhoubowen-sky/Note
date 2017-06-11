@@ -1,6 +1,6 @@
 /**
  * 说明：APP采用的是多Activity + 多Fragment的方式编写的
- * 其中APP启动后首页的Tab采用的是 Fragment + ViewPager
+ * 其中APP启动后首页的Tab采用的是 Fragment
  */
 
 package com.lingdongkuaichuan.note.activity;
@@ -12,7 +12,9 @@ import android.content.SharedPreferences;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -27,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lingdongkuaichuan.note.R;
+import com.lingdongkuaichuan.note.adapter.NoteAdapter;
 import com.lingdongkuaichuan.note.bean.Folder;
 import com.lingdongkuaichuan.note.bean.Note;
 import com.lingdongkuaichuan.note.db.DbHelper;
@@ -58,11 +61,16 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     public static final String ADD_OR_EDIT_NOTE = "add_or_edit_note";
     public static final String NOTE_ID          = "note_id";   // Note 的ID
 
+    // 实例化三个fragment
+    private HomeFragment homeFragment     = new HomeFragment();
+    private FolderFragment folderFragment = new FolderFragment();
+    private UserFragment userFragment     = new UserFragment();
 
-    private ViewPager mViewPager;
-    private FrameLayout fl_note_list;
-    private FragmentPagerAdapter mFragmentPagerAdapter; // 适配器
-    private List<Fragment> mFragments;                  // 存储三个Fragment的List
+    private FragmentManager fragmentManager;
+    private FragmentTransaction fragmentTransaction;
+
+
+    private FrameLayout fl_note_list; // 主界面的 frameLayout 布局
 
     // Tab 上三个图片按钮
     private ImageButton img_btn_home;
@@ -85,7 +93,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private LinearLayout id_tab_mark;
     private LinearLayout id_tab_delete;
     private LinearLayout id_tab_move_to_folder;
-
 
     public static Context mContext;
 
@@ -115,6 +122,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         //requestWindowFeature(Window.FEATURE_NO_TITLE); // 不显示toolebar
         setContentView(R.layout.activity_main);
+
+        // 向HomeFragment 传递参数 用以区分是从MainActivity跳转进去的
+        Bundle bundle = new Bundle();
+        bundle.putInt(DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID, 0);
+        homeFragment.setArguments(bundle);
 
         setContext();
 
@@ -166,15 +178,37 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private void setPagerSelect(int currentItem) {
         // 首先要更改Tab按钮的样式
         setTab(currentItem);
-        mViewPager.setCurrentItem(currentItem);
+//        mViewPager.setCurrentItem(currentItem);
+        fragmentManager = getSupportFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
+        switch (currentItem){
+            case FRAGMENT_HOME:
+                changeHeadTitle("首页");
+                setHeadImgBtnVisible(View.VISIBLE , FRAGMENT_HOME);
+                fragmentTransaction.replace(R.id.fl_note_list, homeFragment);
+                fragmentTransaction.commit();
+                break;
+            case FRAGMENT_FOLDER:
+                changeHeadTitle("文件夹");
+                setHeadImgBtnVisible(View.VISIBLE , FRAGMENT_FOLDER);
+                fragmentTransaction.replace(R.id.fl_note_list, folderFragment);
+                fragmentTransaction.commit();
+                break;
+            case FRAGMENT_USER:
+                changeHeadTitle("我的");
+                setHeadImgBtnVisible(View.GONE , FRAGMENT_USER);
+                fragmentTransaction.replace(R.id.fl_note_list, userFragment);
+                fragmentTransaction.commit();
+                break;
+        }
+
     }
 
     /**
      * 初始化布局的函数
      */
     private void initView() {
-        mViewPager = (ViewPager) findViewById(R.id.id_viewpager);
-        fl_note_list = (FrameLayout) findViewById(R.id.fl_note_list);
+        fl_note_list = (FrameLayout) findViewById(R.id.fl_note_list); // FrameLayout 布局
 
         mHome   = (LinearLayout) findViewById(R.id.id_tab_home);
         mFolder = (LinearLayout) findViewById(R.id.id_tab_folder);
@@ -186,8 +220,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         // 两个tab的布局
         ll_note_tab      = (LinearLayout) findViewById(R.id.ll_note_tab);
         ll_note_tab_edit = (LinearLayout) findViewById(R.id.ll_note_tab_edit);
-//        ll_note_tab.setVisibility(View.GONE);
-//        ll_note_tab_edit.setVisibility(View.VISIBLE);
 
         img_btn_home           = (ImageButton) findViewById(R.id.img_btn_home);
         img_btn_folder         = (ImageButton) findViewById(R.id.img_btn_folder);
@@ -203,76 +235,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         tv_head_title        = (TextView) findViewById(R.id.tv_head_title);
         img_btn_back         = (ImageButton) findViewById(R.id.img_btn_back);
 
-        // 分别实例化这三个Fragment 并放入List
-        mFragments = new ArrayList<Fragment>();
-        Fragment mHome   = new HomeFragment();
-        {
-            // 向HomeFragment 传递参数 用以区分是从MainActivity跳转进去的
-            Bundle bundle = new Bundle();
-            bundle.putInt(DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID, 0);
-            mHome.setArguments(bundle);
-        }
-        Fragment mFolder = new FolderFragment();
-        Fragment mUser   = new UserFragment();
-        mFragments.add(mHome);
-        mFragments.add(mFolder);
-        mFragments.add(mUser);
 
-        // 实例化一个数据适配器，传入这个List
-        mFragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int position) {
-                return mFragments.get(position);
-            }
-
-            @Override
-            public int getCount() {
-                return mFragments.size();
-            }
-        };
-        // 设置适配器
-        mViewPager.setAdapter(mFragmentPagerAdapter);
-
-        // Page页面改变时，即左右滑动，所要执行的操作
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-            @Override
-            public void onPageSelected(int position) {
-                int currentItem = mViewPager.getCurrentItem();
-                setTab(currentItem); // 更改Tab样式
-
-                Log.d(TAG, "当前ViewPager页面ID为：" + currentItem);
-                // 更改 head 布局以及 head上面按钮
-                switch (currentItem){
-                    case FRAGMENT_HOME:
-                        changeHeadTitle("首页");
-                        setHeadImgBtnVisible(View.VISIBLE , FRAGMENT_HOME);
-//                        HomeFragment.noteList.clear();
-//                        HomeFragment.noteList = NoteDB.getAllNotes(0);
-
-                        break;
-                    case FRAGMENT_FOLDER:
-                        changeHeadTitle("文件夹");
-                        setHeadImgBtnVisible(View.VISIBLE , FRAGMENT_FOLDER);
-                        // 右上角添加note按钮gone 添加文件夹按钮 visible
-
-                        break;
-                    case FRAGMENT_USER:
-                        changeHeadTitle("我的");
-                        setHeadImgBtnVisible(View.GONE , FRAGMENT_USER);
-
-                        break;
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
     }
 
     /**
@@ -374,7 +337,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 deleteNotes(getSelectedNotes(HomeFragment.noteList));
                 Toast.makeText(getApplicationContext(), "已删除" + getSelectedNotes(HomeFragment.noteList).size() + "条便签", Toast.LENGTH_SHORT).show();
                 // 刷新界面
-                initView();
+//                HomeFragment.noteList = NoteDB.getAllNotes(0);
+//                HomeFragment.listView.setAdapter(new NoteAdapter(this, HomeFragment.noteList));
+                HomeFragment.refreshListView();
                 break;
             case R.id.id_tab_move_to_folder:
                 // 将选中的便签移动到指定的分组
@@ -511,8 +476,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                         Toast.makeText(getApplicationContext(), "分组添加失败", Toast.LENGTH_LONG).show();
                     }else {
                         Log.e(TAG, "分组添加成功");
-                        initView();
-                        setPagerSelect(FRAGMENT_FOLDER);
+                        // 刷新界面
+                        FolderFragment.refreshListView();
                         Toast.makeText(getApplicationContext(), "分组添加成功", Toast.LENGTH_SHORT).show();
                     }
                 }else {
@@ -529,11 +494,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         switch (requestCode){
             case 1:
                 // INTENT_ADD_NOTE 添加新便签
-                initView();
+                HomeFragment.refreshListView();
                 break;
             case 2:
                 // INTENT_EDIT_NOTE 编辑已有的便签
-                initView();
+                HomeFragment.refreshListView();
                 break;
             case 3:
                 // 进入了editlistactivity
@@ -558,14 +523,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         img_btn_search_notes.setVisibility(View.GONE);
         // 展示左上角展示返回的图片按钮
         img_btn_back.setVisibility(View.VISIBLE);
-        // viewpager 不可滑动
-        mViewPager.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                // 设置为trunk不允许滑动
-                return true;
-            }
-        });
     }
 
     /**
@@ -585,16 +542,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         img_btn_search_notes.setVisibility(View.VISIBLE);
         // 隐藏左上角展示返回的图片按钮
         img_btn_back.setVisibility(View.GONE);
-        // viewpager 可滑动
-        mViewPager.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                // 设置为trunk不允许滑动
-                return false;
-            }
-        });
     }
 
+    private long firstTime = 0;
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
@@ -605,7 +555,15 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 isResetEditTab = false;
                 return true;
             }else {
-                return super.onKeyDown(keyCode, event);
+                // 双击back 弹出toast 提示再退出
+                long secondTime = System.currentTimeMillis();
+                if (secondTime - firstTime > 2000){
+                    Toast.makeText(getApplicationContext(), "再次点击返回键退出程序", Toast.LENGTH_SHORT).show();
+                    firstTime = secondTime;
+                    return true;
+                }else {
+                    return super.onKeyDown(keyCode, event);
+                }
             }
 
         } else {
@@ -616,7 +574,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     @Override
     public void reFreshView(String string) {
-        initView();
-        setPagerSelect(FRAGMENT_FOLDER);
+
     }
 }

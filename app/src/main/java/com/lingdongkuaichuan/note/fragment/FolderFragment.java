@@ -44,11 +44,11 @@ public class FolderFragment extends Fragment {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private ListView listView;
+    public static ListView listView;
 
     public static FolderAdapter folderAdapter;
 
-    private List<Folder> folderList = new ArrayList<Folder>();
+    public static List<Folder> folderList = new ArrayList<Folder>();
 
     // 上下文菜单项常量
     private static final int MENU_RENAME = Menu.FIRST;
@@ -122,11 +122,11 @@ public class FolderFragment extends Fragment {
 
     }
 
-    private void refreshListView() {
+    public static void refreshListView() {
         folderList.clear();
         folderList = NoteDB.getAllFolders();
-        Log.e(TAG, "folderlist的大小为：" + folderList.size());
-        folderAdapter = new FolderAdapter(folderList, getActivity());
+        Log.e("FolderFragment", "folderlist的大小为：" + folderList.size());
+        folderAdapter = new FolderAdapter(folderList, MainActivity.mContext);
         listView.setAdapter(folderAdapter);
     }
 
@@ -169,7 +169,7 @@ public class FolderFragment extends Fragment {
                 }else {
                     newFolder.setName(ed_folder_name.getText().toString());
                     reNameFolder(newFolder);
-                    refreshListView.reFreshView("MENU_RENAME");
+                    refreshListView();
                 }
             }
         });
@@ -210,7 +210,7 @@ public class FolderFragment extends Fragment {
                     Toast.makeText(getActivity(), DEFAULT_FOLDER_NAME + " 不能删除", Toast.LENGTH_LONG).show();
                 }else {
                     deleteFolder(folder_item);
-                    refreshListView.reFreshView("MENU_DELETE");
+                    refreshListView();
                 }
                 break;
             default:

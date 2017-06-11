@@ -3,11 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="45dp"
     android:layout_gravity="bottom"
+    android:id="@+id/ll_tab"
     android:gravity="center"
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/ll_note_tab"
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="45dp">
 

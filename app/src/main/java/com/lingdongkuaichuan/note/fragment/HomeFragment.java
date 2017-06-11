@@ -34,7 +34,7 @@ public class HomeFragment extends Fragment {
     private final String TAG = this.getClass().getSimpleName();
 
 
-    private ListView listView;
+    public static ListView listView;
 
     public static NoteAdapter noteAdapter;
 
@@ -85,10 +85,10 @@ public class HomeFragment extends Fragment {
     }
 
 
-    private void refreshListView(){
+    public static void refreshListView(){
         noteList.clear();
         noteList = NoteDB.getAllNotes(0);
-        noteAdapter = new NoteAdapter(getActivity(), noteList);
+        noteAdapter = new NoteAdapter(MainActivity.mContext, noteList);
         listView.setAdapter(noteAdapter);
     }
 
