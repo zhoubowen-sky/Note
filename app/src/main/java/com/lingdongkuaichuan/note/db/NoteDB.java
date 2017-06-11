@@ -67,12 +67,22 @@ public class NoteDB {
     }
 
     /**
-     * 取出所有的便签数据
+     * 取出所有的便签数据 根据 folder_id 查询
      * @return
      */
-    public static List<Note> getAllNotes(){
+    public static List<Note> getAllNotes(int folder_id_){
         List<Note> noteList = new ArrayList<Note>();
-        String sql = "select * from " + DbHelper.TABLE_NOTE_NAME + " order by " + DbHelper.TABLE_NOTE_COLUMN_DATE + " desc";
+        String sql;
+        if (folder_id_ == 0){
+            // 取出所有数据
+            sql = "select * from " + DbHelper.TABLE_NOTE_NAME + " order by " + DbHelper.TABLE_NOTE_COLUMN_DATE + " desc";
+        }else {
+            sql = "select * from " + DbHelper.TABLE_NOTE_NAME
+                    + " where " + DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID
+                    + " = " + folder_id_ +  " order by "
+                    + DbHelper.TABLE_NOTE_COLUMN_DATE + " desc";
+        }
+
         Cursor cursor = db.rawQuery(sql, null);
         while (cursor.moveToNext()){
             String date    = cursor.getString(cursor.getColumnIndex(DbHelper.TABLE_NOTE_COLUMN_DATE));

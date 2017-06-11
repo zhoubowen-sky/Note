@@ -17,6 +17,14 @@
 
     </android.support.v4.view.ViewPager>
 
+    <FrameLayout
+        android:id="@+id/fl_note_list"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </FrameLayout>
+
     <!--底部Tab按钮的布局-->
     <include layout="@layout/tab_btn_layout"></include>
 

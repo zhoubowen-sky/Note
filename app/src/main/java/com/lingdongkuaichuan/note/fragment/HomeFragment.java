@@ -19,6 +19,7 @@ import com.lingdongkuaichuan.note.activity.EditNoteActivity;
 import com.lingdongkuaichuan.note.activity.MainActivity;
 import com.lingdongkuaichuan.note.adapter.NoteAdapter;
 import com.lingdongkuaichuan.note.bean.Note;
+import com.lingdongkuaichuan.note.db.DbHelper;
 import com.lingdongkuaichuan.note.db.NoteDB;
 
 import java.util.ArrayList;
@@ -43,10 +44,28 @@ public class HomeFragment extends Fragment {
 
     public static boolean isShowCheckBox = false;
 
+    private int folder_id;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 获取传进来的数据
+        Bundle bundle = getArguments();
+        folder_id = bundle.getInt(DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID);
+        Log.e(TAG, "传进来的folder_id ：" + folder_id);
+        if (folder_id == 0){
+            // 从 MainActivity 跳转进来的
+            noteList.clear();
+            noteList = NoteDB.getAllNotes(0);
+        }else {
+            // 从 folderFragment 跳转过来的
+            noteList.clear();
+            noteList = NoteDB.getAllNotes(folder_id);
+        }
+
+        Log.e(TAG, "noteList 数据个数为：" + noteList.size());
     }
 
     @Override
@@ -55,7 +74,6 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         listView = (ListView) view.findViewById(R.id.lv_note);
-
 
         // 绘制 listview 画面
         refreshListView();
@@ -69,7 +87,7 @@ public class HomeFragment extends Fragment {
 
     private void refreshListView(){
         noteList.clear();
-        noteList = NoteDB.getAllNotes();
+        noteList = NoteDB.getAllNotes(0);
         noteAdapter = new NoteAdapter(getActivity(), noteList);
         listView.setAdapter(noteAdapter);
     }

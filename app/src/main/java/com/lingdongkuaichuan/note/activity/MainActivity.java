@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 import com.lingdongkuaichuan.note.R;
 import com.lingdongkuaichuan.note.bean.Folder;
 import com.lingdongkuaichuan.note.bean.Note;
+import com.lingdongkuaichuan.note.db.DbHelper;
 import com.lingdongkuaichuan.note.db.NoteDB;
 import com.lingdongkuaichuan.note.fragment.FolderFragment;
 import com.lingdongkuaichuan.note.fragment.HomeFragment;
@@ -37,7 +39,6 @@ import com.lingdongkuaichuan.note.utils.DateUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.lingdongkuaichuan.note.db.DbHelper.DEFAULT_FOLDER_NAME;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener, HomeFragment.HomeToMainActivity, FolderFragment.FolderToMainActivity {
 
@@ -59,6 +60,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 
     private ViewPager mViewPager;
+    private FrameLayout fl_note_list;
     private FragmentPagerAdapter mFragmentPagerAdapter; // 适配器
     private List<Fragment> mFragments;                  // 存储三个Fragment的List
 
@@ -144,7 +146,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         edtior.commit();
         // 首次启动，执行写入默认数据的操作
         // 默认给folder创建一条数据，默认文件夹
-        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, DEFAULT_FOLDER_NAME, DateUtil.getCurrentDateLine()));
+        NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, DbHelper.DEFAULT_FOLDER_NAME, DateUtil.getCurrentDateLine()));
         NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, "分组一", DateUtil.getCurrentDateLine()));
         NoteDB.insertOneFolder(new Folder(EditNoteActivity.NEW_NOTE_FOLDER_ID, "分组二", DateUtil.getCurrentDateLine()));
 
@@ -172,6 +174,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     private void initView() {
         mViewPager = (ViewPager) findViewById(R.id.id_viewpager);
+        fl_note_list = (FrameLayout) findViewById(R.id.fl_note_list);
 
         mHome   = (LinearLayout) findViewById(R.id.id_tab_home);
         mFolder = (LinearLayout) findViewById(R.id.id_tab_folder);
@@ -203,6 +206,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         // 分别实例化这三个Fragment 并放入List
         mFragments = new ArrayList<Fragment>();
         Fragment mHome   = new HomeFragment();
+        {
+            // 向HomeFragment 传递参数 用以区分是从MainActivity跳转进去的
+            Bundle bundle = new Bundle();
+            bundle.putInt(DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID, 0);
+            mHome.setArguments(bundle);
+        }
         Fragment mFolder = new FolderFragment();
         Fragment mUser   = new UserFragment();
         mFragments.add(mHome);
@@ -230,7 +239,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
             }
-
             @Override
             public void onPageSelected(int position) {
                 int currentItem = mViewPager.getCurrentItem();
@@ -242,6 +250,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     case FRAGMENT_HOME:
                         changeHeadTitle("首页");
                         setHeadImgBtnVisible(View.VISIBLE , FRAGMENT_HOME);
+//                        HomeFragment.noteList.clear();
+//                        HomeFragment.noteList = NoteDB.getAllNotes(0);
 
                         break;
                     case FRAGMENT_FOLDER:
@@ -355,7 +365,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case R.id.id_tab_user:
                 setPagerSelect(FRAGMENT_USER);
                 break;
-
             case R.id.id_tab_mark:
                 // 标记选中的便签，置顶
                 Toast.makeText(getApplicationContext(), "id_tab_mark", Toast.LENGTH_SHORT).show();
@@ -374,7 +383,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 showSelectFolderDialog();
 
                 break;
-
             case R.id.img_btn_search_notes:
                 // 按照关键字查找便签
 
@@ -396,7 +404,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 // 当展示出了新的tab后，此按钮才显示出来，点击它要取消 setEditTab()做出的操作
                 reSetEditTab("点击了左上角 back 按钮传入的参数");
                 break;
-
         }
     }
 
@@ -528,6 +535,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 // INTENT_EDIT_NOTE 编辑已有的便签
                 initView();
                 break;
+            case 3:
+                // 进入了editlistactivity
+                Log.e(TAG, "进入了editlistactivity 并跳转回MainActivity");
+                break;
         }
     }
 
@@ -582,8 +593,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 return false;
             }
         });
-        // 解除对 keyback拦截事件
-
     }
 
     @Override

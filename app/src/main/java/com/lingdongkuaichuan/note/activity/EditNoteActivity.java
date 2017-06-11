@@ -1,5 +1,6 @@
 package com.lingdongkuaichuan.note.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +18,7 @@ import com.lingdongkuaichuan.note.db.NoteDB;
 import com.lingdongkuaichuan.note.fragment.HomeFragment;
 import com.lingdongkuaichuan.note.utils.DateUtil;
 
-public class EditNoteActivity extends AppCompatActivity {
+public class EditNoteActivity extends Activity {
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -46,8 +47,8 @@ public class EditNoteActivity extends AppCompatActivity {
         Log.d(TAG, "MainActivity传到EditNoteActivity的参数为：" + stringFromMainActivity);
         switch (stringFromMainActivity){
             case MainActivity.INTENT_ADD_NOTE:
-                note = new Note(1, getNoteTitle(), getNoteContent(), getNoteDate(), NEW_NOTE_FOLDER_ID);
-                new_note_id = addOneNote(note);
+//                note = new Note(1, getNoteTitle(), getNoteContent(), getNoteDate(), NEW_NOTE_FOLDER_ID);
+//                new_note_id = addOneNote(note);
                 break;
             case MainActivity.INTENT_EDIT_NOTE:
                 // 获取从MainActivity传递过来的整个Note对象，填充到 editText
@@ -128,13 +129,26 @@ public class EditNoteActivity extends AppCompatActivity {
         // 自动保存书签内容 需要更新title以及日期
         super.onPause();
         if (stringFromMainActivity.equals(MainActivity.INTENT_ADD_NOTE)){
-            note = null;
-            note = new Note((int) new_note_id, getNoteTitle(), getNoteContent(), getNoteDate(), NEW_NOTE_FOLDER_ID);
+            Log.e(TAG, "程序进入了 INTENT_ADD_NOTE");
+            // 如果便签内容为空 则不添加便签
+            if (getNoteContent().trim().equals("") || getNoteContent().trim() == null || getNoteContent().trim() == ""){
+                Log.e(TAG, "程序进入了 内容为空，不执行任何操作");
+                // 内容为空，不执行任何操作
+            }else {
+                Log.e(TAG, "程序进入了 内容不为空，执行插入便签");
+                note = new Note(1, getNoteTitle(), getNoteContent(), getNoteDate(), NEW_NOTE_FOLDER_ID);
+                new_note_id = addOneNote(note);
+                note = null;
+                note = new Note((int) new_note_id, getNoteTitle(), getNoteContent(), getNoteDate(), NEW_NOTE_FOLDER_ID);
+                updateNoteToDB(note);
+            }
+
         }else if (stringFromMainActivity.equals(MainActivity.INTENT_EDIT_NOTE)){
+            Log.e(TAG, "程序进入了 内容不为空，执行编辑便签");
             note = null;
             note = new Note(note_before.getId(), getNoteTitle(), getNoteContent(), getNoteDate(), note_before.getFolder_id());
+            updateNoteToDB(note);
         }
-        updateNoteToDB(note);
     }
 
 

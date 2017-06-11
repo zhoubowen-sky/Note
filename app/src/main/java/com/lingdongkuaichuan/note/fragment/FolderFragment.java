@@ -2,9 +2,12 @@ package com.lingdongkuaichuan.note.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -15,13 +18,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.lingdongkuaichuan.note.R;
+import com.lingdongkuaichuan.note.activity.EditNoteActivity;
 import com.lingdongkuaichuan.note.activity.MainActivity;
 import com.lingdongkuaichuan.note.adapter.FolderAdapter;
 import com.lingdongkuaichuan.note.bean.Folder;
+import com.lingdongkuaichuan.note.db.DbHelper;
 import com.lingdongkuaichuan.note.db.NoteDB;
 import com.lingdongkuaichuan.note.utils.DateUtil;
 
@@ -49,15 +55,12 @@ public class FolderFragment extends Fragment {
 
     private static final int MENU_DELETE = Menu.FIRST + 1;
 
+    public static final String FOLDER_ID = "folder_id";
+
     private FolderToMainActivity refreshListView;
 
     private Folder newFolder;
 
-    private static FragmentTransaction transaction;
-
-    private HomeFragment homeFragment;
-
-    private MainActivity mainActivity = (MainActivity) getActivity();
 
 
     @Override
@@ -103,6 +106,19 @@ public class FolderFragment extends Fragment {
      */
     private void turnPageToNoteList(Folder folder) {
         Log.e(TAG, "点击了  " + folder.getName() + "  文件夹");
+
+        // 采用 HomeFragment 复用实现跳转 notelist界面
+        HomeFragment homeFragment = new HomeFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(DbHelper.TABLE_NOTE_COLUMN_FOLDER_ID,folder.getId());
+        homeFragment.setArguments(bundle);
+        FragmentManager fragmentManager         = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fl_note_list, homeFragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
+
 
     }
 
